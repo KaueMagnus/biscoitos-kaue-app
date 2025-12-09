@@ -13,19 +13,23 @@ class Client {
     this.phone,
   });
 
-  factory Client.fromMap(Map<String, dynamic> m) => Client(
-    id: m['id'],
-    name: m['name'] ?? '',
-    city: m['city'] ?? '',
-    email: m['email'],
-    phone: m['phone'],
-  );
+  factory Client.fromMap(Map<String, dynamic> json) {
+    return Client(
+      id: json['id'],
+      name: json['name'],
+      city: json['city'],
+      email: json['email'],
+      phone: json['phone'],
+    );
+  }
 
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'name': name,
-    'city': city,
-    'email': email,
-    'phone': phone,
-  };
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'city': city,
+      'email': email,
+      'phone': phone,
+    };
+  }
 }

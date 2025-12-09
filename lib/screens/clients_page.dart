@@ -18,6 +18,7 @@ class ClientsPage extends StatelessWidget {
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final c = clients[index];
+
           return ListTile(
             title: Text(c.name),
             subtitle: Text(c.city),
@@ -25,7 +26,6 @@ class ClientsPage extends StatelessWidget {
                 ? const Icon(Icons.email, size: 20)
                 : null,
             onTap: () {
-              // por enquanto abre um diálogo com detalhes (iremos navegar para Produtos depois)
               showModalBottomSheet(
                 context: context,
                 builder: (_) => _clientDetailsSheet(context, c),
@@ -60,7 +60,6 @@ class ClientsPage extends StatelessWidget {
             children: [
               ElevatedButton.icon(
                 onPressed: () {
-                  // futuro: navegar para ProductsPage passando cliente
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Abrir produtos (em desenvolvimento)')),

@@ -1,16 +1,43 @@
-# biscoitos_kaue_app
+# Biscoitos Kauê App 🍪
 
-A new Flutter project.
+![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-blue?style=for-the-badge)
 
-## Getting Started
+Aplicativo mobile desenvolvido para representantes comerciais realizarem pedidos de produtos **Biscoitos Kauê** diretamente em mercados e padarias. O foco principal é a **operação offline**, garantindo funcionalidade mesmo em áreas sem cobertura de internet.
 
-This project is a starting point for a Flutter application.
+📍 **Região:** Brasil — Santa Catarina e Rio Grande do Sul
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🎯 Objetivo
+Validar o conceito (MVP) com representantes da região para agilizar o processo de vendas antes de investir em APIs robustas e backend próprio. O sistema foca na simplicidade e na capacidade de operar desconectado.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 📱 Funcionalidades (MVP)
+
+O aplicativo permite:
+
+- **Gestão de Pedidos:** Adicionar itens, definir quantidades e visualizar total.
+- **Trocas:** Solicitação de trocas por produtos avariados.
+- **Offline-First:** Opera totalmente sem internet, sincronizando quando houver conexão.
+- **Exportação:** Envio do pedido finalizado por e-mail (solução inicial).
+- **Cadastro:** Registro local de clientes.
+- **Histórico:** Visualização de pedidos anteriores salvos no dispositivo.
+
+---
+
+## 🚀 Tecnologias
+
+- **Framework:** [Flutter](https://flutter.dev/)
+- **Linguagem:** [Dart](https://dart.dev/)
+- **Gerência de Estado:** Provider (Migração para Riverpod planejada)
+- **Banco de Dados Local:** SQLite (via `sqflite`)
+
+---
+
+## 👨‍💻 Desenvolvedor
+Desenvolvido por **Kaue Magnus Magnus** como parte de um projeto pessoal para modernizar o processo de pedidos dos representantes Biscoitos Kauê e facilitar o envio de pedidos entre a fábrica e os clientes.
+
+O objetivo inicial é substituir o antigo app Android e prover uma versão atualizada, simples, moderna e com funcionamento offline.

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/clients_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
       ),
-      home: const HomeScreen(),
+      routes: {
+        '/': (_) => const HomeScreen(),
+        '/clients': (_) => const ClientsPage(),
+      },
+      initialRoute: '/',
     );
   }
 }
@@ -25,11 +30,28 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Biscoitos Kauê'),
+      ),
       body: Center(
-        child: Text(
-          'Biscoitos Kaue',
-          style: TextStyle(fontSize: 28),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/clients');
+              },
+              child: const Text('Novo Pedido'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/clients'); // por enquanto reutiliza lista de clientes
+              },
+              child: const Text('Pedido de Troca'),
+            ),
+          ],
         ),
       ),
     );

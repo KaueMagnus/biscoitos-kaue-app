@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/client.dart';
 import '../services/mock_data.dart';
+import 'products_screen.dart';
 
 class ClientsPage extends StatelessWidget {
   const ClientsPage({super.key});
@@ -44,7 +45,9 @@ class ClientsPage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(c.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(c.name,
+              style:
+              const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Text('Cidade: ${c.city}'),
           if (c.email != null) ...[
@@ -56,13 +59,17 @@ class ClientsPage extends StatelessWidget {
             Text('Telefone: ${c.phone}'),
           ],
           const SizedBox(height: 16),
+
           Row(
             children: [
               ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Abrir produtos (em desenvolvimento)')),
+                  Navigator.pop(context); // fecha modal
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProductsScreen(clientId: c.id),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.shopping_cart),
@@ -73,7 +80,8 @@ class ClientsPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Abrir tela de Troca (em desenvolvimento)')),
+                    const SnackBar(
+                        content: Text('Tela de troca (futuro)')),
                   );
                 },
                 icon: const Icon(Icons.swap_horiz),
@@ -81,6 +89,7 @@ class ClientsPage extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 12),
         ],
       ),

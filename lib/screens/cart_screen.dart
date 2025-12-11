@@ -74,7 +74,7 @@ class CartScreen extends StatelessWidget {
                   height: 52,
                   child: ElevatedButton(
                     onPressed: () async {
-                      final order = await OrderService.finalizeOrder(clientId);
+                      final order = await OrderService.createOrder(clientId);
 
                       Navigator.push(
                         context,

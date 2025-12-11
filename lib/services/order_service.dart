@@ -1,42 +1,44 @@
-import '../models/order.dart';
+import 'package:biscoitos_kaue_app/models/order.dart';
 import '../models/order_item.dart';
-import '../services/cart_service.dart';
 import 'order_database.dart';
+import 'cart_service.dart';
 
 class OrderService {
-  static Future<Order> finalizeOrder(int clientId) async {
-    // Convertendo itens do carrinho para OrderItem (SEM referência a Product)
-    final orderItems = CartService.items.map((cartItem) {
-      return OrderItem(
-        productId: cartItem.product.id!,
-        quantity: cartItem.quantity,
-        subtotal: cartItem.product.price * cartItem.quantity,
+  static Future<Order> createOrder(int clientId) async {
+    final cartItems = CartService.items;
+
+    if (cartItems.isEmpty) {
+      throw Exception("Carrinho vazio");
+    }
+
+    final total = CartService.total;
+
+    // Criar pedido no banco
+    final orderId = await OrderDatabase.instance.insertOrder(clientId, total);
+
+    // Inserir os itens
+    for (var item in cartItems) {
+      await OrderDatabase.instance.insertOrderItem(
+        orderId: orderId,
+        productId: item.product.id,
+        productName: item.product.name, // 👈 AGORA ENVIADO
+        quantity: item.quantity,
+        subtotal: item.subtotal,
       );
-    }).toList();
+    }
 
-    // Criando objeto Pedido
-    final order = Order(
-      clientId: clientId,
-      items: orderItems,
-      total: CartService.total,
-      date: DateTime.now(),
-    );
-
-    // Inserindo no banco e recebendo o ID
-    final orderId = await OrderDatabase.insertOrder(order);
-
-    // Criamos o objeto final com ID preenchido
-    final savedOrder = Order(
-      id: orderId,
-      clientId: clientId,
-      items: orderItems,
-      total: CartService.total,
-      date: order.date,
-    );
-
-    // Limpa o carrinho após finalizar
+    // Limpa o carrinho
     CartService.clear();
 
-    return savedOrder;
+    // Buscar os itens inseridos
+    final orderItems = await OrderDatabase.instance.getOrderItems(orderId);
+
+    return Order(
+      id: orderId,
+      clientId: clientId,
+      total: total,
+      date: DateTime.now(),
+      items: orderItems,
+    );
   }
 }

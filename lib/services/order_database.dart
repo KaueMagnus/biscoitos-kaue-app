@@ -1,36 +1,93 @@
 import 'package:sqflite/sqflite.dart';
-import '../database/app_database.dart';
-import '../models/order.dart';
+import 'package:path/path.dart';
 import '../models/order_item.dart';
 
 class OrderDatabase {
-  static Future<int> insertOrder(Order order) async {
-    final db = await AppDatabase.instance.database;
+  OrderDatabase._();
+  static final OrderDatabase instance = OrderDatabase._();
 
-    // Salva o pedido
-    final orderId = await db.insert('orders', order.toMap());
+  Database? _db;
 
-    // Salva os itens
-    for (final item in order.items) {
-      await db.insert('order_items', item.toMap(orderId));
-    }
-
-    return orderId;
+  Future<Database> get database async {
+    if (_db != null) return _db!;
+    return _db = await _initDb();
   }
 
-  static Future<List<Order>> getAllOrders() async {
-    final db = await AppDatabase.instance.database;
+  Future<Database> _initDb() async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'orders.db');
 
-    final result = await db.query('orders', orderBy: 'date DESC');
+    return await openDatabase(
+      path,
+      version: 2, // 👈 IMPORTANTE
+      onCreate: (db, version) async {
+        await db.execute('''
+          CREATE TABLE orders(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            clientId INTEGER,
+            total REAL,
+            date TEXT
+          )
+        ''');
 
-    return result.map((map) {
-      return Order(
-        id: map['id'] as int,
-        clientId: map['client_id'] as int,
-        items: [],
-        total: (map['total'] as num).toDouble(),
-        date: DateTime.parse(map['date'].toString()),
-      );
-    }).toList();
+        await db.execute('''
+          CREATE TABLE order_items(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER,
+            product_id INTEGER,
+            product_name TEXT,
+            quantity INTEGER,
+            subtotal REAL
+          )
+        ''');
+      },
+
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion == 1) {
+          await db.execute("ALTER TABLE order_items ADD COLUMN product_name TEXT");
+        }
+      },
+    );
+  }
+
+  Future<int> insertOrder(int clientId, double total) async {
+    final db = await database;
+    return db.insert('orders', {
+      'clientId': clientId,
+      'total': total,
+      'date': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<int> insertOrderItem({
+    required int orderId,
+    required int productId,
+    required String productName,
+    required int quantity,
+    required double subtotal,
+  }) async {
+    final db = await database;
+    return db.insert(
+      'order_items',
+      {
+        'order_id': orderId,
+        'product_id': productId,
+        'product_name': productName,
+        'quantity': quantity,
+        'subtotal': subtotal,
+      },
+    );
+  }
+
+  Future<List<OrderItemDb>> getOrderItems(int orderId) async {
+    final db = await database;
+
+    final maps = await db.query(
+      'order_items',
+      where: 'order_id = ?',
+      whereArgs: [orderId],
+    );
+
+    return maps.map((m) => OrderItemDb.fromMap(m)).toList();
   }
 }

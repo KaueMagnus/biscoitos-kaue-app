@@ -1,24 +1,17 @@
 import 'order_item.dart';
 
 class Order {
-  final int? id;
+  final int id;
   final int clientId;
-  final List<OrderItem> items;
   final double total;
   final DateTime date;
+  final List<OrderItemDb> items;
 
   Order({
-    this.id,
+    required this.id,
     required this.clientId,
-    required this.items,
     required this.total,
     required this.date,
+    required this.items,
   });
-
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'client_id': clientId,
-    'total': total,
-    'date': date.toIso8601String(),
-  };
 }

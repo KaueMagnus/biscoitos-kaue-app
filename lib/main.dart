@@ -1,3 +1,4 @@
+import 'package:biscoitos_kaue_app/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/clients_page.dart';
 
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (_) => const HomeScreen(),
         '/clients': (_) => const ClientsPage(),
+        '/cart': (_) => const CartScreen(),
       },
       initialRoute: '/',
     );

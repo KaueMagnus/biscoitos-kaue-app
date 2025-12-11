@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import '../services/cart_service.dart';
 
 class NewOrderScreen extends StatefulWidget {
   final int clientId;
@@ -89,14 +90,12 @@ class _NewOrderScreenState extends State<NewOrderScreen> {
               height: 52,
               child: ElevatedButton(
                 onPressed: () {
-                  // 🟢 Aqui futuramente iremos adicionar ao carrinho
+                  CartService.addItem(product, quantity);
+
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        '${product.name} x$quantity adicionado ao pedido!',
-                      ),
-                    ),
+                    SnackBar(content: Text('${product.name} x$quantity adicionado!')),
                   );
+
                   Navigator.pop(context);
                 },
                 child: const Text(

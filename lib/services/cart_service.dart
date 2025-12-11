@@ -2,24 +2,35 @@ import '../models/cart_item.dart';
 import '../models/product.dart';
 
 class CartService {
-  static final List<CartItem> items = [];
+  // Lista interna de itens
+  static final List<CartItem> _items = [];
 
+  // Getter de leitura
+  static List<CartItem> get items => _items;
+
+  // Adiciona item ao carrinho
   static void addItem(Product product, int qty) {
-    // Caso o item já exista, soma a quantidade
-    final existing = items.where((i) => i.product.id == product.id);
+    final existing = _items.where((i) => i.product.id == product.id);
 
     if (existing.isNotEmpty) {
       existing.first.quantity += qty;
     } else {
-      items.add(CartItem(product: product, quantity: qty));
+      _items.add(CartItem(product: product, quantity: qty));
     }
   }
 
+  // Limpa carrinho
   static void clear() {
-    items.clear();
+    _items.clear();
   }
 
+  // Total de itens (soma das quantidades)
+  static int get totalItems {
+    return _items.fold<int>(0, (sum, item) => sum + item.quantity);
+  }
+
+  // Total em dinheiro
   static double get total {
-    return items.fold(0, (sum, item) => sum + item.subtotal);
+    return _items.fold<double>(0, (sum, item) => sum + item.subtotal);
   }
 }

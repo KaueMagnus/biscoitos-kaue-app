@@ -19,13 +19,10 @@ class ClientsPage extends StatelessWidget {
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final c = clients[index];
-
           return ListTile(
             title: Text(c.name),
             subtitle: Text(c.city),
-            trailing: c.email != null
-                ? const Icon(Icons.email, size: 20)
-                : null,
+            trailing: c.email != null ? const Icon(Icons.email, size: 20) : null,
             onTap: () {
               showModalBottomSheet(
                 context: context,
@@ -45,9 +42,7 @@ class ClientsPage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(c.name,
-              style:
-              const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(c.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Text('Cidade: ${c.city}'),
           if (c.email != null) ...[
@@ -59,16 +54,22 @@ class ClientsPage extends StatelessWidget {
             Text('Telefone: ${c.phone}'),
           ],
           const SizedBox(height: 16),
-
           Row(
             children: [
               ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.pop(context); // fecha modal
+                  if (c.id == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Erro: cliente sem ID')),
+                    );
+                    return;
+                  }
+
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => ProductsScreen(clientId: c.id),
+                      builder: (_) => ProductsScreen(clientId: c.id!),
                     ),
                   );
                 },
@@ -80,8 +81,7 @@ class ClientsPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Tela de troca (futuro)')),
+                    const SnackBar(content: Text('Troca ainda não implementada')),
                   );
                 },
                 icon: const Icon(Icons.swap_horiz),
@@ -89,8 +89,6 @@ class ClientsPage extends StatelessWidget {
               ),
             ],
           ),
-
-          const SizedBox(height: 12),
         ],
       ),
     );

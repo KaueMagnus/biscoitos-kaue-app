@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import '../services/cart_service.dart';
 import '../models/cart_item.dart';
+import '../services/cart_service.dart';
+import '../services/order_service.dart';
+import 'order_confirmation_screen.dart';
 
 class CartScreen extends StatelessWidget {
-  const CartScreen({super.key});
+  final int clientId;
+
+  const CartScreen({super.key, required this.clientId});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +46,7 @@ class CartScreen extends StatelessWidget {
             ),
           ),
 
-          // Total
+          // TOTAL
           Container(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -67,12 +71,16 @@ class CartScreen extends StatelessWidget {
                 // Botão Finalizar Pedido
                 SizedBox(
                   width: double.infinity,
+                  height: 52,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // No futuro: salvar no banco e enviar email
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Finalização ainda não implementada'),
+                    onPressed: () async {
+                      final order = await OrderService.finalizeOrder(clientId);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              OrderConfirmationScreen(order: order),
                         ),
                       );
                     },

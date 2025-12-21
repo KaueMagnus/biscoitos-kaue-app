@@ -20,7 +20,24 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final products = MockData.products;
+    final products = MockData.products
+        .where((p) => p.active)
+        .toList();
+
+    products.sort((a, b) {
+      final cat = a.category.compareTo(b.category);
+      if (cat != 0) return cat;
+      final pr = a.priority.compareTo(b.priority);
+      if (pr != 0) return pr;
+      return a.name.compareTo(b.name);
+    });
+
+    final Map<String, List<Product>> grouped = {};
+
+    for (final p in products) {
+      grouped.putIfAbsent(p.category, () => []);
+      grouped[p.category]!.add(p);
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7EFE7),
@@ -85,30 +102,42 @@ class _ProductsScreenState extends State<ProductsScreen> {
             const SizedBox(height: 16),
 
             Expanded(
-              child: ListView.separated(
-                itemCount: products.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 14),
-                itemBuilder: (_, i) {
-                  final product = products[i];
+              child: ListView(
+                children: grouped.entries.map((entry) {
+                  final category = entry.key;
+                  final items = entry.value;
 
-                  return AppCard(
-                    icon: Icons.cookie_outlined,
-                    title: product.name,
-                    subtitle: "R\$ ${product.price.toStringAsFixed(2)}",
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => NewOrderScreen(
-                            clientId: widget.clientId,
-                            product: product,
-                          ),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SectionTitle("— $category —"),
+                      const SizedBox(height: 12),
+
+                      ...items.map((product) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: AppCard(
+                          icon: Icons.cookie_outlined,
+                          title: "${product.name} ${product.weightG}g",
+                          subtitle: "Cód. ${product.code} • R\$ ${product.price.toStringAsFixed(2)}",
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => NewOrderScreen(
+                                  clientId: widget.clientId,
+                                  product: product,
+                                ),
+                              ),
+                            );
+                            setState(() {}); // atualiza badge
+                          },
                         ),
-                      );
-                      setState(() {}); // Atualiza badge do carrinho
-                    },
+                      )),
+
+                      const SizedBox(height: 28),
+                    ],
                   );
-                },
+                }).toList(),
               ),
             ),
           ],

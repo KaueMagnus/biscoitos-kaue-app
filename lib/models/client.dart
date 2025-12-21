@@ -1,12 +1,12 @@
 class Client {
-  final int? id;
+  final int id;
   final String name;
   final String city;
   final String? email;
   final String? phone;
 
   Client({
-    this.id,
+    required this.id,
     required this.name,
     required this.city,
     this.email,

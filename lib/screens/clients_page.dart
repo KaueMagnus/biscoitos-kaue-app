@@ -1,95 +1,104 @@
 import 'package:flutter/material.dart';
 import '../models/client.dart';
 import '../services/mock_data.dart';
+import '../widgets/app_card.dart';
+import '../widgets/section_title.dart';
 import 'products_screen.dart';
 
-class ClientsPage extends StatelessWidget {
+class ClientsPage extends StatefulWidget {
   const ClientsPage({super.key});
 
   @override
+  State<ClientsPage> createState() => _ClientsPageState();
+}
+
+class _ClientsPageState extends State<ClientsPage> {
+  String searchQuery = "";
+
+  @override
   Widget build(BuildContext context) {
-    final List<Client> clients = MockData.clients;
+    final List<Client> allClients = MockData.clients;
+
+    // 🔎 Filtragem simples
+    final filteredClients = allClients.where((c) {
+      return c.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          c.city.toLowerCase().contains(searchQuery.toLowerCase());
+    }).toList();
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF7EFE7),
+
       appBar: AppBar(
-        title: const Text('Clientes'),
+        title: const Text("Clientes"),
+        backgroundColor: Colors.brown.shade500,
+        foregroundColor: Colors.white,
+        elevation: 2,
       ),
-      body: ListView.separated(
-        itemCount: clients.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          final c = clients[index];
-          return ListTile(
-            title: Text(c.name),
-            subtitle: Text(c.city),
-            trailing: c.email != null ? const Icon(Icons.email, size: 20) : null,
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (_) => _clientDetailsSheet(context, c),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
 
-  Widget _clientDetailsSheet(BuildContext context, Client c) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(c.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text('Cidade: ${c.city}'),
-          if (c.email != null) ...[
-            const SizedBox(height: 8),
-            Text('Email: ${c.email}'),
-          ],
-          if (c.phone != null) ...[
-            const SizedBox(height: 8),
-            Text('Telefone: ${c.phone}'),
-          ],
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  if (c.id == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Erro: cliente sem ID')),
-                    );
-                    return;
-                  }
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionTitle("Selecione o Cliente"),
 
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ProductsScreen(clientId: c.id!),
-                    ),
+            const SizedBox(height: 12),
+
+            // 🔍 Campo de busca
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Buscar cliente...",
+                filled: true,
+                fillColor: Colors.white,
+                prefixIcon: const Icon(Icons.search),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (text) {
+                setState(() => searchQuery = text);
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            Expanded(
+              child: filteredClients.isEmpty
+                  ? Center(
+                child: Text(
+                  "Nenhum cliente encontrado",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.brown.shade700,
+                  ),
+                ),
+              )
+                  : ListView.separated(
+                itemCount: filteredClients.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 14),
+                itemBuilder: (_, i) {
+                  final c = filteredClients[i];
+
+                  return AppCard(
+                    icon: Icons.storefront_outlined,
+                    title: c.name,
+                    subtitle: c.city,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProductsScreen(clientId: c.id),
+                        ),
+                      );
+                    },
                   );
                 },
-                icon: const Icon(Icons.shopping_cart),
-                label: const Text('Fazer Pedido'),
               ),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Troca ainda não implementada')),
-                  );
-                },
-                icon: const Icon(Icons.swap_horiz),
-                label: const Text('Troca'),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

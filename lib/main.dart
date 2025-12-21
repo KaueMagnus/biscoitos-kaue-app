@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/home_screen.dart';
 import 'screens/clients_page.dart';
 
 void main() {
@@ -15,45 +16,20 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.brown.shade500,
+          foregroundColor: Colors.white,
+          elevation: 2,
+          centerTitle: true,
+          actionsIconTheme: const IconThemeData(color: Colors.white, size: 28),
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
       ),
       routes: {
         '/': (_) => const HomeScreen(),
         '/clients': (_) => const ClientsPage(),
       },
       initialRoute: '/',
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Biscoitos Kauê'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/clients');
-              },
-              child: const Text('Novo Pedido'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/clients'); // por enquanto reutiliza lista de clientes
-              },
-              child: const Text('Pedido de Troca'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

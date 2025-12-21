@@ -90,4 +90,12 @@ class OrderDatabase {
 
     return maps.map((m) => OrderItemDb.fromMap(m)).toList();
   }
+
+  Future<List<Map<String, dynamic>>> getAllOrders() async {
+    final db = await database;
+    return await db.query(
+      'orders',
+      orderBy: 'id DESC',
+    );
+  }
 }

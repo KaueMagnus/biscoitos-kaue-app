@@ -1,107 +1,155 @@
 import 'package:flutter/material.dart';
 import '../models/order.dart';
-import '../services/client_service.dart';
 
 class OrderConfirmationScreen extends StatelessWidget {
   final Order order;
 
   const OrderConfirmationScreen({super.key, required this.order});
 
-  String formatDate(DateTime date) {
-    return "${date.day.toString().padLeft(2, '0')}/"
-        "${date.month.toString().padLeft(2, '0')}/"
-        "${date.year}  "
-        "${date.hour.toString().padLeft(2, '0')}:"
-        "${date.minute.toString().padLeft(2, '0')}";
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Obter o cliente usando o clientId do pedido
-    final client = ClientService.getById(order.clientId);
-
     return Scaffold(
+      backgroundColor: const Color(0xFFF8EFEA),
+
       appBar: AppBar(
         title: const Text("Pedido Finalizado"),
+        backgroundColor: Colors.brown.shade600,
+        foregroundColor: Colors.white,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Número do pedido
+            const SizedBox(height: 20),
+
+            // ÍCONE DE SUCESSO
+            Icon(
+              Icons.check_circle,
+              color: Colors.green.shade600,
+              size: 100,
+            ),
+
+            const SizedBox(height: 20),
+
             Text(
-              "Pedido nº ${order.id}",
-              style: const TextStyle(
+              "Pedido realizado com sucesso!",
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
+                color: Colors.brown.shade800,
               ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Dados do cliente
-            Text(
-              "Cliente: ${client.name}",
-              style: const TextStyle(fontSize: 18),
-            ),
-            Text(
-              "Cidade: ${client.city}",
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Data
-            Text(
-              "Data: ${formatDate(order.date)}",
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Total
-            Text(
-              "Total: R\$ ${order.total.toStringAsFixed(2)}",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Título "Itens"
-            const Text(
-              "Itens:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
             ),
 
             const SizedBox(height: 8),
 
-            // Lista de itens
-            ...order.items.map(
-                  (i) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Text(
-                  "${i.quantity}x ${i.productName} — R\$ ${i.subtotal.toStringAsFixed(2)}",
-                  style: const TextStyle(fontSize: 16),
+            Text(
+              "Número do Pedido: ${order.id}",
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.brown.shade600,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // CARD DO RESUMO DO PEDIDO
+            Card(
+              elevation: 3,
+              shadowColor: Colors.brown.shade200,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Resumo do Pedido",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.brown.shade800,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // LISTA DOS ITENS
+                    ...order.items.map((i) {
+                      return Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  "${i.productName} (x${i.quantity})",
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                              Text(
+                                "R\$ ${i.subtotal.toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+                          Divider(color: Colors.brown.shade200),
+                        ],
+                      );
+                    }),
+
+                    const SizedBox(height: 10),
+
+                    // TOTAL
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Total:",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "R\$ ${order.total.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
 
-            const Spacer(),
+            const SizedBox(height: 28),
 
-            // Botão final
-            Center(
+            // BOTÃO VOLTAR AO INÍCIO
+            SizedBox(
+              width: double.infinity,
+              height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                  backgroundColor: Colors.brown.shade700,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onPressed: () {
-                  // Volta ao início limpando o stack de telas
-                  Navigator.popUntil(context, (r) => r.isFirst);
+                  Navigator.popUntil(context, (route) => route.isFirst);
                 },
                 child: const Text(
                   "Voltar ao Início",

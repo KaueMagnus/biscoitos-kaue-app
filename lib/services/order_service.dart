@@ -41,4 +41,27 @@ class OrderService {
       items: orderItems,
     );
   }
+  
+  static Future<List<Order>> getAllOrders() async {
+    final rows = await OrderDatabase.instance.getAllOrders();
+    List<Order> orders = [];
+
+    for (var row in rows) {
+      final orderId = row['id'] as int;
+
+      final items = await OrderDatabase.instance.getOrderItems(orderId);
+
+      orders.add(
+        Order(
+          id: orderId,
+          clientId: row['clientId'],
+          total: row['total'],
+          date: DateTime.parse(row['date']),
+          items: items,
+        ),
+      );
+    }
+
+    return orders;
+  }
 }

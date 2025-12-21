@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/order.dart';
+import '../services/mock_data.dart'; // ✅ para resolver productId -> Product
 
 class OrderConfirmationScreen extends StatelessWidget {
   final Order order;
@@ -10,13 +11,11 @@ class OrderConfirmationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8EFEA),
-
       appBar: AppBar(
         title: const Text("Pedido Finalizado"),
         backgroundColor: Colors.brown.shade600,
         foregroundColor: Colors.white,
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -24,7 +23,6 @@ class OrderConfirmationScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
 
-            // ÍCONE DE SUCESSO
             Icon(
               Icons.check_circle,
               color: Colors.green.shade600,
@@ -55,7 +53,6 @@ class OrderConfirmationScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // CARD DO RESUMO DO PEDIDO
             Card(
               elevation: 3,
               shadowColor: Colors.brown.shade200,
@@ -78,8 +75,16 @@ class OrderConfirmationScreen extends StatelessWidget {
 
                     const SizedBox(height: 16),
 
-                    // LISTA DOS ITENS
+                    // ✅ LISTA DOS ITENS (resolve pelo productId)
                     ...order.items.map((i) {
+                      final product = MockData.products.firstWhere(
+                            (p) => p.id == i.productId,
+                        // fallback só pra não quebrar se faltar algo
+                        orElse: () => MockData.products.first,
+                      );
+
+                      final displayName = "${product.name} ${product.weightG}g";
+
                       return Column(
                         children: [
                           Row(
@@ -87,7 +92,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                             children: [
                               Flexible(
                                 child: Text(
-                                  "${i.productName} (x${i.quantity})",
+                                  "$displayName (x${i.quantity})",
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ),
@@ -100,7 +105,6 @@ class OrderConfirmationScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-
                           const SizedBox(height: 12),
                           Divider(color: Colors.brown.shade200),
                         ],
@@ -109,7 +113,6 @@ class OrderConfirmationScreen extends StatelessWidget {
 
                     const SizedBox(height: 10),
 
-                    // TOTAL
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -136,7 +139,6 @@ class OrderConfirmationScreen extends StatelessWidget {
 
             const SizedBox(height: 28),
 
-            // BOTÃO VOLTAR AO INÍCIO
             SizedBox(
               width: double.infinity,
               height: 52,

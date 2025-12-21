@@ -1,10 +1,9 @@
-import 'package:biscoitos_kaue_app/models/order.dart';
-import '../models/order_item.dart';
+import '../models/order.dart';
 import 'order_database.dart';
 import 'cart_service.dart';
 
 class OrderService {
-  static Future<Order> createOrder(int clientId) async {
+  static Future<Order> createOrder(int clientId, {String? note}) async {
     final cartItems = CartService.items;
 
     if (cartItems.isEmpty) {
@@ -13,24 +12,23 @@ class OrderService {
 
     final total = CartService.total;
 
-    // Criar pedido no banco
-    final orderId = await OrderDatabase.instance.insertOrder(clientId, total);
+    final orderId = await OrderDatabase.instance.insertOrder(
+      clientId,
+      total,
+      note: note,
+    );
 
-    // Inserir os itens
     for (var item in cartItems) {
       await OrderDatabase.instance.insertOrderItem(
         orderId: orderId,
-        productId: item.product.id,
-        productName: item.product.name, // 👈 AGORA ENVIADO
+        productId: item.product.id!, // assume id não nulo
         quantity: item.quantity,
         subtotal: item.subtotal,
       );
     }
 
-    // Limpa o carrinho
     CartService.clear();
 
-    // Buscar os itens inseridos
     final orderItems = await OrderDatabase.instance.getOrderItems(orderId);
 
     return Order(
@@ -38,30 +36,7 @@ class OrderService {
       clientId: clientId,
       total: total,
       date: DateTime.now(),
-      items: orderItems,
+      items: orderItems, // se seu Order usa outro tipo, me fala que ajusto
     );
-  }
-  
-  static Future<List<Order>> getAllOrders() async {
-    final rows = await OrderDatabase.instance.getAllOrders();
-    List<Order> orders = [];
-
-    for (var row in rows) {
-      final orderId = row['id'] as int;
-
-      final items = await OrderDatabase.instance.getOrderItems(orderId);
-
-      orders.add(
-        Order(
-          id: orderId,
-          clientId: row['clientId'],
-          total: row['total'],
-          date: DateTime.parse(row['date']),
-          items: items,
-        ),
-      );
-    }
-
-    return orders;
   }
 }

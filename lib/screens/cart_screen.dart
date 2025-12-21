@@ -14,69 +14,94 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  final TextEditingController _noteCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _noteCtrl.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = CartService.items;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7EFE7),
-
       appBar: AppBar(
         title: const Text("Carrinho"),
         backgroundColor: Colors.brown.shade500,
         foregroundColor: Colors.white,
         elevation: 2,
       ),
-
       body: items.isEmpty
           ? const Center(
-        child: Text(
-          "Seu carrinho está vazio",
-          style: TextStyle(fontSize: 18),
-        ),
+        child: Text("Seu carrinho está vazio", style: TextStyle(fontSize: 18)),
       )
           : Column(
         children: [
           Expanded(
-            child: ListView.separated(
+            child: ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: items.length,
-              separatorBuilder: (_, __) =>
-              const SizedBox(height: 16),
-              itemBuilder: (_, i) {
-                final CartItem item = items[i];
+              children: [
+                ...items.map(_buildCartItem).toList(),
+                const SizedBox(height: 18),
 
-                return _buildCartItem(item);
-              },
+                // --------------------------
+                // OBSERVAÇÃO
+                // --------------------------
+                Text(
+                  "Observação do Pedido",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown.shade800,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _noteCtrl,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: "Ex: entregar sexta / produto avariado / falar com comprador...",
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.brown.shade200),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.brown.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.brown.shade400, width: 2),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-
-          _buildBottomTotal(),
+          _buildBottomTotal(context),
         ],
       ),
     );
   }
 
-  // --------------------------
-  // CARD DO ITEM (estilo iFood)
-  // --------------------------
   Widget _buildCartItem(CartItem item) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          )
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
         ],
       ),
       child: Row(
         children: [
-          // Ícone do produto
           Container(
             width: 46,
             height: 46,
@@ -86,43 +111,30 @@ class _CartScreenState extends State<CartScreen> {
             ),
             child: const Icon(Icons.cookie_outlined, size: 26),
           ),
-
           const SizedBox(width: 16),
-
-          // Nome + subtotal
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item.product.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
+                Text(item.product.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 4),
-                Text(
-                  "R\$ ${item.subtotal.toStringAsFixed(2)}",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.brown.shade700,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Text("R\$ ${item.subtotal.toStringAsFixed(2)}",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.brown.shade700,
+                      fontWeight: FontWeight.w600,
+                    )),
               ],
             ),
           ),
-
-          // Botões +/- estilo iFood
           Row(
             children: [
               _qtyButton(
                 icon: Icons.remove,
                 onTap: () {
                   if (item.quantity > 1) {
-                    CartService.updateQuantity(
-                        item.product.id!, item.quantity - 1);
+                    CartService.updateQuantity(item.product.id!, item.quantity - 1);
                   } else {
                     CartService.removeItem(item.product.id!);
                   }
@@ -133,17 +145,13 @@ class _CartScreenState extends State<CartScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
                   item.quantity.toString(),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
               _qtyButton(
                 icon: Icons.add,
                 onTap: () {
-                  CartService.updateQuantity(
-                      item.product.id!, item.quantity + 1);
+                  CartService.updateQuantity(item.product.id!, item.quantity + 1);
                   setState(() {});
                 },
               ),
@@ -154,9 +162,6 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  // --------------------------
-  // BOTÃO CIRCULAR iFood
-  // --------------------------
   Widget _qtyButton({required IconData icon, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
@@ -174,44 +179,25 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  // --------------------------
-  // TOTAL + BOTÃO FINALIZAR
-  // --------------------------
-  Widget _buildBottomTotal() {
+  Widget _buildBottomTotal(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.brown.shade50,
-        border: Border(
-          top: BorderSide(color: Colors.brown.shade200),
-        ),
+        border: Border(top: BorderSide(color: Colors.brown.shade200)),
       ),
       child: Column(
         children: [
-          // Total do pedido
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Total do Pedido:",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "R\$ ${CartService.total.toStringAsFixed(2)}",
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              const Text("Total do Pedido:",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("R\$ ${CartService.total.toStringAsFixed(2)}",
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             ],
           ),
-
-          const SizedBox(height: 20),
-
-          // Botão finalizar
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             height: 52,
@@ -219,23 +205,22 @@ class _CartScreenState extends State<CartScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.brown.shade600,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               onPressed: () async {
-                final order = await OrderService.createOrder(widget.clientId);
+                final note = _noteCtrl.text.trim();
+                final order = await OrderService.createOrder(
+                  widget.clientId,
+                  note: note.isEmpty ? null : note,
+                );
+
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => OrderConfirmationScreen(order: order),
-                  ),
+                  MaterialPageRoute(builder: (_) => OrderConfirmationScreen(order: order)),
                 );
               },
-              child: const Text(
-                "Finalizar Pedido",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              child: const Text("Finalizar Pedido",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
           )
         ],

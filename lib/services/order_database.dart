@@ -19,50 +19,49 @@ class OrderDatabase {
 
     return await openDatabase(
       path,
-      version: 2, // 👈 IMPORTANTE
+      version: 2, // 🔥 subiu versão
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE orders(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             clientId INTEGER,
             total REAL,
-            date TEXT
+            date TEXT,
+            note TEXT
           )
         ''');
 
         await db.execute('''
           CREATE TABLE order_items(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            order_id INTEGER,
-            product_id INTEGER,
-            product_name TEXT,
+            orderId INTEGER,
+            productId INTEGER,
             quantity INTEGER,
             subtotal REAL
           )
         ''');
       },
-
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion == 1) {
-          await db.execute("ALTER TABLE order_items ADD COLUMN product_name TEXT");
+        if (oldVersion < 2) {
+          await db.execute("ALTER TABLE orders ADD COLUMN note TEXT");
         }
       },
     );
   }
 
-  Future<int> insertOrder(int clientId, double total) async {
+  Future<int> insertOrder(int clientId, double total, {String? note}) async {
     final db = await database;
     return db.insert('orders', {
       'clientId': clientId,
       'total': total,
       'date': DateTime.now().toIso8601String(),
+      'note': note,
     });
   }
 
   Future<int> insertOrderItem({
     required int orderId,
     required int productId,
-    required String productName,
     required int quantity,
     required double subtotal,
   }) async {
@@ -70,9 +69,8 @@ class OrderDatabase {
     return db.insert(
       'order_items',
       {
-        'order_id': orderId,
-        'product_id': productId,
-        'product_name': productName,
+        'orderId': orderId,
+        'productId': productId,
         'quantity': quantity,
         'subtotal': subtotal,
       },
@@ -84,7 +82,7 @@ class OrderDatabase {
 
     final maps = await db.query(
       'order_items',
-      where: 'order_id = ?',
+      where: 'orderId = ?',
       whereArgs: [orderId],
     );
 
@@ -93,9 +91,11 @@ class OrderDatabase {
 
   Future<List<Map<String, dynamic>>> getAllOrders() async {
     final db = await database;
+
     return await db.query(
       'orders',
-      orderBy: 'id DESC',
+      orderBy: 'date DESC',
     );
   }
+
 }

@@ -9,20 +9,22 @@ import 'cart_screen.dart';
 
 class ProductsScreen extends StatefulWidget {
   final int clientId;
+  final bool isSwap;
 
-  const ProductsScreen({super.key, required this.clientId});
+  const ProductsScreen({
+    super.key,
+    required this.clientId,
+    this.isSwap = false,
+  });
 
   @override
   State<ProductsScreen> createState() => _ProductsScreenState();
 }
 
 class _ProductsScreenState extends State<ProductsScreen> {
-
   @override
   Widget build(BuildContext context) {
-    final products = MockData.products
-        .where((p) => p.active)
-        .toList();
+    final products = MockData.products.where((p) => p.active).toList();
 
     products.sort((a, b) {
       final cat = a.category.compareTo(b.category);
@@ -33,7 +35,6 @@ class _ProductsScreenState extends State<ProductsScreen> {
     });
 
     final Map<String, List<Product>> grouped = {};
-
     for (final p in products) {
       grouped.putIfAbsent(p.category, () => []);
       grouped[p.category]!.add(p);
@@ -41,64 +42,36 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7EFE7),
-
       appBar: AppBar(
-        title: const Text("Produtos"),
+        title: Text(widget.isSwap ? "Produtos (Troca)" : "Produtos"),
         backgroundColor: Colors.brown.shade500,
         foregroundColor: Colors.white,
-        elevation: 2,
-        centerTitle: true,
         actions: [
-          // -------------------------
-          // BADGE DO CARRINHO
-          // -------------------------
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined, size: 28),
-                onPressed: () async {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => CartScreen(clientId: widget.clientId)),
-                  );
-                  setState(() {}); // Atualiza badge ao voltar
-                },
-              ),
-
-              // Badge
-              if (CartService.totalItems > 0)
-                Positioned(
-                  right: 6,
-                  top: 10,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      CartService.totalItems.toString(),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+          IconButton(
+            icon: const Icon(Icons.shopping_cart_outlined, size: 28),
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CartScreen(
+                    clientId: widget.clientId,
+                    isSwap: widget.isSwap,
                   ),
                 ),
-            ],
+              );
+              setState(() {});
+            },
           ),
         ],
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SectionTitle("Selecione um Produto"),
-
+            SectionTitle(
+              widget.isSwap ? "Selecione os Produtos (Troca)" : "Selecione um Produto",
+            ),
             const SizedBox(height: 16),
 
             Expanded(
@@ -112,28 +85,29 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     children: [
                       SectionTitle("— $category —"),
                       const SizedBox(height: 12),
-
-                      ...items.map((product) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: AppCard(
-                          icon: Icons.cookie_outlined,
-                          title: "${product.name} ${product.weightG}g",
-                          subtitle: "Cód. ${product.code} • R\$ ${product.price.toStringAsFixed(2)}",
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => NewOrderScreen(
-                                  clientId: widget.clientId,
-                                  product: product,
+                      ...items.map(
+                            (product) => Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: AppCard(
+                            icon: Icons.cookie_outlined,
+                            title: "${product.name} ${product.weightG}g",
+                            subtitle:
+                            "Cód. ${product.code} • R\$ ${product.price.toStringAsFixed(2)}",
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => NewOrderScreen(
+                                    clientId: widget.clientId,
+                                    product: product,
+                                  ),
                                 ),
-                              ),
-                            );
-                            setState(() {}); // atualiza badge
-                          },
+                              );
+                              setState(() {});
+                            },
+                          ),
                         ),
-                      )),
-
+                      ),
                       const SizedBox(height: 28),
                     ],
                   );

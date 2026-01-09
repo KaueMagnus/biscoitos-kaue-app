@@ -19,7 +19,7 @@ class OrderDatabase {
 
     return await openDatabase(
       path,
-      version: 2, // 🔥 subiu versão
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE orders(
@@ -27,7 +27,9 @@ class OrderDatabase {
             clientId INTEGER,
             total REAL,
             date TEXT,
-            note TEXT
+            note TEXT,
+            type TEXT,
+            swapReason TEXT
           )
         ''');
 
@@ -45,17 +47,29 @@ class OrderDatabase {
         if (oldVersion < 2) {
           await db.execute("ALTER TABLE orders ADD COLUMN note TEXT");
         }
+        if (oldVersion < 3) {
+          await db.execute("ALTER TABLE orders ADD COLUMN type TEXT");
+          await db.execute("ALTER TABLE orders ADD COLUMN swapReason TEXT");
+        }
       },
     );
   }
 
-  Future<int> insertOrder(int clientId, double total, {String? note}) async {
+  Future<int> insertOrder(
+    int clientId,
+    double total, {
+    String? note,
+    required String type,
+    String? swapReason,
+  }) async {
     final db = await database;
     return db.insert('orders', {
       'clientId': clientId,
       'total': total,
       'date': DateTime.now().toIso8601String(),
       'note': note,
+      'type': type,
+      'swapReason': swapReason,
     });
   }
 
@@ -66,15 +80,12 @@ class OrderDatabase {
     required double subtotal,
   }) async {
     final db = await database;
-    return db.insert(
-      'order_items',
-      {
-        'orderId': orderId,
-        'productId': productId,
-        'quantity': quantity,
-        'subtotal': subtotal,
-      },
-    );
+    return db.insert('order_items', {
+      'orderId': orderId,
+      'productId': productId,
+      'quantity': quantity,
+      'subtotal': subtotal,
+    });
   }
 
   Future<List<OrderItemDb>> getOrderItems(int orderId) async {
@@ -92,10 +103,6 @@ class OrderDatabase {
   Future<List<Map<String, dynamic>>> getAllOrders() async {
     final db = await database;
 
-    return await db.query(
-      'orders',
-      orderBy: 'date DESC',
-    );
+    return await db.query('orders', orderBy: 'date DESC');
   }
-
 }

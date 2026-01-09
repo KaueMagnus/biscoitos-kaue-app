@@ -11,38 +11,26 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7EFE7),
-
       appBar: AppBar(
         title: const Text(
           'Biscoitos Kauê',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         ),
         backgroundColor: Colors.brown.shade500,
         foregroundColor: Colors.white,
-        elevation: 2,
         centerTitle: true,
       ),
-
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             const SectionTitle("Bem-vindo!"),
-
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               "Escolha uma das opções abaixo:",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.brown.shade600,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.brown.shade600),
             ),
-
             const SizedBox(height: 28),
 
             DashboardCard(
@@ -52,7 +40,9 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const ClientsPage()),
+                  MaterialPageRoute(
+                    builder: (_) => const ClientsPage(isSwap: false),
+                  ),
                 );
               },
             ),
@@ -66,7 +56,9 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const ClientsPage()),
+                  MaterialPageRoute(
+                    builder: (_) => const ClientsPage(isSwap: true),
+                  ),
                 );
               },
             ),
@@ -80,7 +72,9 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const OrderHistoryScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const OrderHistoryScreen(),
+                  ),
                 );
               },
             ),

@@ -6,8 +6,13 @@ import 'order_confirmation_screen.dart';
 
 class CartScreen extends StatefulWidget {
   final int clientId;
+  final bool isSwap;
 
-  const CartScreen({super.key, required this.clientId});
+  const CartScreen({
+    super.key,
+    required this.clientId,
+    this.isSwap = false,
+  });
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -15,10 +20,12 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   final TextEditingController _noteCtrl = TextEditingController();
+  final TextEditingController _swapReasonCtrl = TextEditingController();
 
   @override
   void dispose() {
     _noteCtrl.dispose();
+    _swapReasonCtrl.dispose();
     super.dispose();
   }
 
@@ -29,7 +36,7 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF7EFE7),
       appBar: AppBar(
-        title: const Text("Carrinho"),
+        title: Text(widget.isSwap ? "Carrinho (Troca)" : "Carrinho"),
         backgroundColor: Colors.brown.shade500,
         foregroundColor: Colors.white,
         elevation: 2,
@@ -48,10 +55,47 @@ class _CartScreenState extends State<CartScreen> {
                 const SizedBox(height: 18),
 
                 // --------------------------
+                // MOTIVO DA TROCA (somente troca)
+                // --------------------------
+                if (widget.isSwap) ...[
+                  Text(
+                    "Motivo da Troca",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _swapReasonCtrl,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText: "Ex: produto quebrado / vencido / erro no pedido...",
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.brown.shade200),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.brown.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.brown.shade400, width: 2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                ],
+
+                // --------------------------
                 // OBSERVAÇÃO
                 // --------------------------
                 Text(
-                  "Observação do Pedido",
+                  widget.isSwap ? "Observação da Troca" : "Observação do Pedido",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -63,7 +107,8 @@ class _CartScreenState extends State<CartScreen> {
                   controller: _noteCtrl,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    hintText: "Ex: entregar sexta / produto avariado / falar com comprador...",
+                    hintText:
+                    "Ex: entregar sexta / produto avariado / falar com comprador...",
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -119,12 +164,14 @@ class _CartScreenState extends State<CartScreen> {
                 Text(item.product.name,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 4),
-                Text("R\$ ${item.subtotal.toStringAsFixed(2)}",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.brown.shade700,
-                      fontWeight: FontWeight.w600,
-                    )),
+                Text(
+                  widget.isSwap ? "—" : "R\$ ${item.subtotal.toStringAsFixed(2)}",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.brown.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
           ),
@@ -134,9 +181,9 @@ class _CartScreenState extends State<CartScreen> {
                 icon: Icons.remove,
                 onTap: () {
                   if (item.quantity > 1) {
-                    CartService.updateQuantity(item.product.id!, item.quantity - 1);
+                    CartService.updateQuantity(item.product.id, item.quantity - 1);
                   } else {
-                    CartService.removeItem(item.product.id!);
+                    CartService.removeItem(item.product.id);
                   }
                   setState(() {});
                 },
@@ -151,7 +198,7 @@ class _CartScreenState extends State<CartScreen> {
               _qtyButton(
                 icon: Icons.add,
                 onTap: () {
-                  CartService.updateQuantity(item.product.id!, item.quantity + 1);
+                  CartService.updateQuantity(item.product.id, item.quantity + 1);
                   setState(() {});
                 },
               ),
@@ -180,6 +227,9 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildBottomTotal(BuildContext context) {
+    final totalText =
+    widget.isSwap ? "R\$ 0,00" : "R\$ ${CartService.total.toStringAsFixed(2)}";
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -191,10 +241,14 @@ class _CartScreenState extends State<CartScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Total do Pedido:",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Text("R\$ ${CartService.total.toStringAsFixed(2)}",
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                widget.isSwap ? "Total da Troca:" : "Total do Pedido:",
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                totalText,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -203,15 +257,26 @@ class _CartScreenState extends State<CartScreen> {
             height: 52,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.brown.shade600,
+                backgroundColor: widget.isSwap ? Colors.orange.shade700 : Colors.brown.shade600,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               onPressed: () async {
                 final note = _noteCtrl.text.trim();
+                final swapReason = _swapReasonCtrl.text.trim();
+
+                if (widget.isSwap && swapReason.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Informe o motivo da troca")),
+                  );
+                  return;
+                }
+
                 final order = await OrderService.createOrder(
                   widget.clientId,
                   note: note.isEmpty ? null : note,
+                  type: widget.isSwap ? "SWAP" : "NORMAL",
+                  swapReason: widget.isSwap ? swapReason : null,
                 );
 
                 Navigator.pushReplacement(
@@ -219,8 +284,10 @@ class _CartScreenState extends State<CartScreen> {
                   MaterialPageRoute(builder: (_) => OrderConfirmationScreen(order: order)),
                 );
               },
-              child: const Text("Finalizar Pedido",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Text(
+                widget.isSwap ? "Salvar Troca" : "Finalizar Pedido",
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
           )
         ],
